@@ -1,10 +1,12 @@
 const express = require("express");
+const path = require("path");
 const app = express();
 const http = require("http");
 const { Server } = require("socket.io");
 const ACTIONS = require("./Actions");
 
 const server = http.createServer(app);
+
 
 const io = new Server(server);
 
@@ -19,6 +21,19 @@ const getAllConnectedClients = (roomId) => {
     }
   );
 };
+
+const dir = __dirname.split('server').join('');
+if ("production") {
+  app.use(express.static(path.join(dir, "/client/build")));
+
+  app.get("*", (req, res) =>
+    res.sendFile(path.resolve(dir, "client", "build", "index.html"))
+  );
+} else {
+  app.get("/", (req, res) => {
+    res.send("API is running..");
+  });
+}
 
 io.on("connection", (socket) => {
   // console.log('Socket connected', socket.id);
